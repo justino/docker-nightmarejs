@@ -1,7 +1,6 @@
 FROM node:latest
-MAINTAINER Ivan Vanderbyl <ivan@flood.io>
 
-# Based on instructions at https://github.com/segmentio/nightmare/issues/224
+USER root
 
 RUN apt-get update
 
@@ -29,24 +28,17 @@ RUN apt-get install -y \
   gcc-multilib \
   g++-multilib
 
-ENV DEBUG="nightmare"
+RUN npm -g config set user root
+RUN npm install -g nightmare
 
-RUN npm install -g yarn
-RUN npm install nightmare
-
-RUN mkdir -p /workspace
 WORKDIR /workspace
-RUN mkdir ./tmp
-
-ADD package.json .
-ADD yarn.lock .
-
-RUN yarn install
-
-ADD . .
 
 COPY entrypoint.sh /entrypoint
-RUN chmod +x /entrypoint
-ENTRYPOINT ["/entrypoint", "node", "--harmony-async-await"]
 
-CMD ["index.js"]
+RUN chmod +x /entrypoint
+
+ENTRYPOINT ["/entrypoint"]
+
+USER node
+
+CMD ["node", "index.js"]
